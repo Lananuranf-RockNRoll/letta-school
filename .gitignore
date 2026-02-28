@@ -1,0 +1,33 @@
+# Environment files
+.env
+*.env
+.env.local
+.env.production
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+frontend/build/
+
+# Go binary
+backend/main
+backend/server
+
+# Docker volumes
+postgres_data/
+
+# IDE
+.idea/
+.vscode/
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
