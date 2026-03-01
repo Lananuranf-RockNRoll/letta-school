@@ -28,13 +28,13 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?sslmode=disable
-      PORT: 3000
+      PORT: ${PORT:-3001}
       GROQ_API_KEY: ${GROQ_API_KEY}
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "3001:3001"
+      - "${PORT:-3001}:${PORT:-3001}"
 
   frontend:
     build:
@@ -45,7 +45,7 @@ services:
     container_name: school_fe
     restart: unless-stopped
     ports:
-      - "5173:80"
+      - "5174:80"
 
   nginx:
     image: nginx:alpine
