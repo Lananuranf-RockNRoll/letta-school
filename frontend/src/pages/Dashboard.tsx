@@ -123,7 +123,7 @@ export default function Dashboard() {
                 <div className="relative">
                     {supportOpen && (
                         <div className="absolute bottom-14 left-0 bg-white rounded-xl shadow-xl border border-gray-100 w-52 overflow-hidden">
-                            <a href="https://wa.me/628xxxxxxxxxx" target="_blank" rel="noopener noreferrer"
+                            <a href="https://wa.me/6285960235008" target="_blank" rel="noopener noreferrer"
                                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-sm text-gray-700">
                                 <MessageCircle size={16} className="text-green-500" />Live Chat
                             </a>
