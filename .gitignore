@@ -52,3 +52,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+
+# JetBrains IDE
+.idea/
+frontend/.idea/
+backend/.idea/
+
+# Generated docs
+frontend/docs/
