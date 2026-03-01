@@ -1,4 +1,4 @@
-import { Search, ChevronUp, Headphones } from "lucide-react";
+import { Search, ChevronUp, Headphones, MessageCircle, BookOpen } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import ScheduleTable from "../components/ScheduleTable";
 import ScheduleModal from "../components/ScheduleModal";
@@ -77,7 +77,6 @@ export default function Schedule() {
 
     return (
         <div className="flex flex-col h-full bg-gray-100">
-            {/* HEADER */}
             <div className="flex justify-between items-center bg-white px-4 md:px-8 py-4 shadow-sm">
                 <h1 className="text-lg md:text-xl font-semibold text-gray-800 ml-10 md:ml-0">Schedule</h1>
                 <button onClick={() => setShowForm(true)} className="bg-sky-500 hover:bg-sky-600 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm">
@@ -85,8 +84,7 @@ export default function Schedule() {
                 </button>
             </div>
 
-            {/* CONTENT */}
-            <div className="flex-1 px-4 md:px-12 py-6 md:py-8 overflow-y-auto">
+            <div className="flex-1 px-4 md:px-12 py-6 md:py-8 overflow-y-auto pb-20">
                 <div className="flex items-center gap-4 mb-6">
                     <div className="flex items-center bg-white px-4 py-2 rounded-lg shadow-sm w-full max-w-md">
                         <Search size={18} className="text-gray-400 shrink-0" />
@@ -110,12 +108,26 @@ export default function Schedule() {
             {showForm && <AddScheduleForm onClose={() => setShowForm(false)} onSuccess={() => { setShowForm(false); fetchData(); }} />}
             {selectedClass && <ScheduleModal selectedClass={selectedClass} onClose={() => setSelectedClass(null)} onRefresh={() => { fetchData(); setSelectedClass(null); }} />}
 
-            <div className="fixed bottom-6 right-6 md:bottom-10 md:right-10">
-                <button onClick={() => setSupportOpen(!supportOpen)} className="flex items-center gap-2 bg-indigo-900 text-white px-4 md:px-6 py-2 md:py-3 rounded-full shadow-lg text-sm">
-                    <Headphones size={18} />
-                    <span className="hidden sm:inline">Support</span>
-                    <ChevronUp size={16} className={`transition-transform ${supportOpen ? "rotate-180" : ""}`} />
-                </button>
+            <div className="fixed bottom-6 left-6 md:bottom-8 md:left-72 z-50">
+                <div className="relative">
+                    {supportOpen && (
+                        <div className="absolute bottom-14 left-0 bg-white rounded-xl shadow-xl border border-gray-100 w-52 overflow-hidden">
+                            <a href="https://wa.me/6285860235008" target="_blank" rel="noopener noreferrer"
+                               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-sm text-gray-700">
+                                <MessageCircle size={16} className="text-green-500" />Live Chat
+                            </a>
+                            <a href="/features"
+                               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-sm text-gray-700 border-t">
+                                <BookOpen size={16} className="text-indigo-500" />Documentation
+                            </a>
+                        </div>
+                    )}
+                    <button onClick={() => setSupportOpen(!supportOpen)}
+                            className="flex items-center gap-2 bg-indigo-900 text-white px-4 py-2 rounded-full shadow-lg text-sm">
+                        <Headphones size={16} /><span>Support</span>
+                        <ChevronUp size={14} className={`transition-transform ${supportOpen ? "rotate-180" : ""}`} />
+                    </button>
+                </div>
             </div>
         </div>
     );

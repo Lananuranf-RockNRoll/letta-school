@@ -1,4 +1,4 @@
-import { Search, ChevronUp, Headphones } from "lucide-react";
+import { Search, ChevronUp, Headphones, FileDown, MessageCircle, BookOpen } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import AddTeacherForm from "../components/AddTeacherForm";
 import TeacherProfile from "../components/TeacherProfile";
@@ -44,28 +44,54 @@ export default function Teachers() {
         }
     };
 
+    const handleExportCSV = () => {
+        if (teachers.length === 0) return;
+        const headers = ["No", "Employee Number", "Full Name", "Email", "Phone", "Gender", "Date of Birth"];
+        const rows = teachers.map((t, i) => [
+            i + 1,
+            t.employee_number || "-",
+            t.full_name,
+            t.email || "-",
+            t.phone || "-",
+            t.gender || "-",
+            t.date_of_birth || "-",
+        ]);
+        const csvContent = [headers, ...rows]
+            .map(row => row.map(v => `"${v}"`).join(","))
+            .join("\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `teachers_page${page}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="flex flex-col h-full bg-gray-100">
-            {/* HEADER */}
             <div className="flex justify-between items-center bg-white px-4 md:px-8 py-4 shadow-sm">
                 {selectedTeacher ? (
                     <div className="flex items-center gap-2 md:gap-4 ml-10 md:ml-0">
-                        <button className="text-xs md:text-sm text-sky-600 hover:underline hidden sm:block">Export CSV</button>
+                        <button onClick={handleExportCSV} className="flex items-center gap-1 text-xs md:text-sm text-sky-600 hover:underline hidden sm:flex">
+                            <FileDown size={14} />Export CSV
+                        </button>
                         <button onClick={() => setShowForm(true)} className="bg-sky-500 hover:bg-sky-600 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm">Add Teachers</button>
                     </div>
                 ) : (
                     <>
                         <h1 className="text-lg md:text-xl font-semibold text-gray-800 ml-10 md:ml-0">Teachers</h1>
                         <div className="flex items-center gap-2 md:gap-4">
-                            <button className="text-xs md:text-sm text-sky-600 hover:underline hidden sm:block">Export CSV</button>
+                            <button onClick={handleExportCSV} className="flex items-center gap-1 text-xs md:text-sm text-sky-600 hover:underline hidden sm:flex">
+                                <FileDown size={14} />Export CSV
+                            </button>
                             <button onClick={() => setShowForm(true)} className="bg-sky-500 hover:bg-sky-600 text-white px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm">Add Teachers</button>
                         </div>
                     </>
                 )}
             </div>
 
-            {/* CONTENT */}
-            <div className="flex-1 px-4 md:px-12 py-6 md:py-8 overflow-y-auto">
+            <div className="flex-1 px-4 md:px-12 py-6 md:py-8 overflow-y-auto pb-20">
                 {!selectedTeacher && (
                     <div className="flex items-center gap-4 mb-6">
                         <div className="flex items-center bg-white px-4 py-2 rounded-lg shadow-sm w-full max-w-md">
@@ -130,12 +156,29 @@ export default function Teachers() {
                 )}
             </div>
 
-            <div className="fixed bottom-6 right-6 md:bottom-10 md:right-10">
-                <button onClick={() => setSupportOpen(!supportOpen)} className="flex items-center gap-2 bg-indigo-900 text-white px-4 md:px-6 py-2 md:py-3 rounded-full shadow-lg text-sm">
-                    <Headphones size={18} />
-                    <span className="hidden sm:inline">Support</span>
-                    <ChevronUp size={16} className={`transition-transform ${supportOpen ? "rotate-180" : ""}`} />
-                </button>
+            <div className="fixed bottom-6 left-6 md:bottom-8 md:left-72 z-50">
+                <div className="relative">
+                    {supportOpen && (
+                        <div className="absolute bottom-14 left-0 bg-white rounded-xl shadow-xl border border-gray-100 w-52 overflow-hidden">
+                            <a href="https://wa.me/6285960235008" target="_blank" rel="noopener noreferrer"
+                               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-sm text-gray-700">
+                                <MessageCircle size={16} className="text-green-500" />
+                                Live Chat
+                            </a>
+                            <a href="/features"
+                               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-sm text-gray-700 border-t">
+                                <BookOpen size={16} className="text-indigo-500" />
+                                Documentation
+                            </a>
+                        </div>
+                    )}
+                    <button onClick={() => setSupportOpen(!supportOpen)}
+                            className="flex items-center gap-2 bg-indigo-900 text-white px-4 py-2 rounded-full shadow-lg text-sm">
+                        <Headphones size={16} />
+                        <span>Support</span>
+                        <ChevronUp size={14} className={`transition-transform ${supportOpen ? "rotate-180" : ""}`} />
+                    </button>
+                </div>
             </div>
         </div>
     );

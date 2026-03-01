@@ -6,6 +6,7 @@ import Teachers from "../pages/Teacher";
 import Students from "../pages/Students";
 import Schedule from "../pages/Schedule";
 import Login from "../pages/Login";
+import Features from "../pages/Features";
 
 function ProtectedLayout({ children }: { children: React.ReactNode }) {
     if (!isLoggedIn()) return <Navigate to="/login" replace />;
@@ -30,7 +31,7 @@ export default function AppRoutes() {
             <Route path="/teachers" element={<ProtectedLayout><Teachers /></ProtectedLayout>} />
             <Route path="/students" element={<ProtectedLayout><Students /></ProtectedLayout>} />
             <Route path="/schedule" element={<ProtectedLayout><Schedule /></ProtectedLayout>} />
-            <Route path="/features" element={<ProtectedLayout><h1 className="text-2xl font-bold">Features</h1></ProtectedLayout>} />
+            <Route path="/features" element={<ProtectedLayout><Features /></ProtectedLayout>} />
 
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
