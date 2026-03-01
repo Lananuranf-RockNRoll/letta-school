@@ -187,6 +187,3 @@ UI mendukung tampilan mobile, tablet, dan desktop:
 
 | Service | URL |
 |---------|-----|
-| Frontend (Netlify) | https://letta-school.netlify.app |
-| Backend (Railway) | https://beschool-production.up.railway.app |
-| Database (Neon PostgreSQL) | `ap-southeast-1.aws.neon.tech` |
