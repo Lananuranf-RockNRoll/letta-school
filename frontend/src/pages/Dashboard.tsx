@@ -1,5 +1,5 @@
 import {
-    UserPlus, School, GraduationCap, Bell, Headphones, ChevronUp, Users, BookOpen,
+    UserPlus, School, GraduationCap, Bell, Headphones, ChevronUp, Users, BookOpen, MessageCircle,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -118,19 +118,28 @@ export default function Dashboard() {
             {showAddClass && <AddClassForm onClose={() => setShowAddClass(false)} onSuccess={() => { setShowAddClass(false); fetchStats(); }} />}
 
             {/* FLOATING SUPPORT */}
-            <div className="fixed bottom-6 right-6 md:bottom-8 md:right-8">
-                <button onClick={() => setSupportOpen(!supportOpen)} className="flex items-center gap-2 bg-indigo-900 text-white px-4 md:px-6 py-2 md:py-3 rounded-full shadow-lg hover:bg-indigo-800 transition text-sm">
-                    <Headphones size={18} />
-                    <span className="hidden sm:inline">Support</span>
-                    <ChevronUp size={16} className={`transition-transform ${supportOpen ? "rotate-180" : ""}`} />
-                </button>
-                {supportOpen && (
-                    <div className="absolute bottom-full right-0 mb-2 w-56 md:w-64 bg-white shadow-xl rounded-xl p-4 text-sm">
-                        <p className="font-semibold mb-2">Need Help?</p>
-                        <button onClick={() => alert("Chat clicked")} className="block w-full text-left px-3 py-2 hover:bg-gray-100 rounded">Live Chat</button>
-                        <button onClick={() => alert("Docs clicked")} className="block w-full text-left px-3 py-2 hover:bg-gray-100 rounded">Documentation</button>
-                    </div>
-                )}
+            {/* FLOATING SUPPORT */}
+            <div className="fixed bottom-6 left-6 md:bottom-8 md:left-72 z-50">
+                <div className="relative">
+                    {supportOpen && (
+                        <div className="absolute bottom-14 left-0 bg-white rounded-xl shadow-xl border border-gray-100 w-52 overflow-hidden">
+                            <a href="https://wa.me/628xxxxxxxxxx" target="_blank" rel="noopener noreferrer"
+                               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-sm text-gray-700">
+                                <MessageCircle size={16} className="text-green-500" />Live Chat
+                            </a>
+                            <a href="/features"
+                               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-sm text-gray-700 border-t">
+                                <BookOpen size={16} className="text-indigo-500" />Documentation
+                            </a>
+                        </div>
+                    )}
+                    <button onClick={() => setSupportOpen(!supportOpen)}
+                            className="flex items-center gap-2 bg-indigo-900 text-white px-4 py-2 rounded-full shadow-lg hover:bg-indigo-800 transition text-sm">
+                        <Headphones size={18} />
+                        <span>Support</span>
+                        <ChevronUp size={16} className={`transition-transform ${supportOpen ? "rotate-180" : ""}`} />
+                    </button>
+                </div>
             </div>
         </div>
     );

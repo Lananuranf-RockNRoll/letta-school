@@ -43,6 +43,7 @@ func main() {
 	handlers.RegisterSubjectRoutes(api, database)
 	handlers.RegisterScheduleRoutes(api, database)
 	handlers.RegisterAssignmentRoutes(api, database)
+    handlers.RegisterAIRoutes(api, database)
 
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "ok"})

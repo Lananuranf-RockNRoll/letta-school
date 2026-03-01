@@ -13,7 +13,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
-      - "5432:5432"   # bisa di-comment kalau ga mau db ke-expose ke luar
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
@@ -29,22 +29,23 @@ services:
     environment:
       DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?sslmode=disable
       PORT: 3000
+      GROQ_API_KEY: ${GROQ_API_KEY}
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "3000:3000"   # opsional, nginx yang akan forward
+      - "3000:3000"
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: /api/v1   # relatif, nginx yang handle routing
+        VITE_API_URL: /api/v1
     container_name: school_fe
     restart: unless-stopped
     ports:
-      - "5173:80"     # opsional, nginx yang akan forward
+      - "5173:80"
 
   nginx:
     image: nginx:alpine
