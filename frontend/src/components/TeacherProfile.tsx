@@ -30,7 +30,7 @@ export default function TeacherProfile({ teacher, onBack, onDelete }: TeacherPro
             const res = await axios.post(`/api/v1/upload/teacher/${teacher.id}`, formData, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
-            setPhotoUrl(res.data.photo_url);
+            setPhotoUrl(res.data.photo_url + "?t=" + Date.now());
         } catch {
             alert("Gagal upload foto");
         } finally {

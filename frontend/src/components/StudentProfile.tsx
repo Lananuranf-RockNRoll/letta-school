@@ -30,7 +30,7 @@ export default function StudentProfile({ student, onBack, onDelete }: StudentPro
             const res = await axios.post(`/api/v1/upload/student/${student.id}`, formData, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
-            setPhotoUrl(res.data.photo_url);
+            setPhotoUrl(res.data.photo_url + "?t=" + Date.now());
         } catch {
             alert("Gagal upload foto");
         } finally {
