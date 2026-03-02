@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Bot, User} from "lucide-react";
+import { MessageCircle, X, Send, Bot, User } from "lucide-react";
 import axios from "axios";
 
 interface Message {
@@ -10,11 +10,12 @@ interface Message {
 export default function AIChat() {
     const [open, setOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
-        { role: "assistant", content: "Halo! Saya asisten AI Letta School 👋\n\nSaya bisa bantu kamu:\n• Cek jadwal kelas\n• Info guru & siswa\n• Analisis data sekolah\n• Generate laporan\n\nAda yang bisa saya bantu?" }
+        { role: "assistant", content: "Selamat datang. Saya Shinra, AI Agent Letta School.\n\nSaya dapat membantu Anda dengan:\n• Informasi siswa, guru, dan kelas\n• Jadwal pelajaran\n• Analisis dan statistik sekolah\n• Laporan data\n\nSilakan sampaikan kebutuhan Anda." }
     ]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
+    const sessionId = useRef(crypto.randomUUID());
 
     useEffect(() => {
         if (open) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -28,11 +29,14 @@ export default function AIChat() {
         setMessages(newMessages);
         setLoading(true);
         try {
-            const history = newMessages.slice(1, -1).map(m => ({ role: m.role, content: m.content }));
-            const res = await axios.post("/api/v1/ai/chat", { message: userMsg, history });
+            const res = await axios.post("/api/v1/ai/chat", {
+                session_id: sessionId.current,
+                message: userMsg,
+                history: []
+            });
             setMessages([...newMessages, { role: "assistant", content: res.data.reply }]);
         } catch {
-            setMessages([...newMessages, { role: "assistant", content: "Maaf, terjadi kesalahan. Coba lagi ya!" }]);
+            setMessages([...newMessages, { role: "assistant", content: "Maaf, terjadi kesalahan. Silakan coba kembali." }]);
         } finally {
             setLoading(false);
         }
@@ -55,14 +59,8 @@ export default function AIChat() {
 
             {/* Chat Window */}
             {open && (
-                <div className="fixed z-50
-                bottom-0 left-0 right-0
-                md:bottom-28 md:left-auto md:right-8 md:w-96
-            ">
-                    <div className="bg-white shadow-2xl border border-gray-100 flex flex-col overflow-hidden
-                    rounded-t-2xl
-                    md:rounded-2xl
-                " style={{ height: "70vh", maxHeight: "560px" }}>
+                <div className="fixed z-50 bottom-0 left-0 right-0 md:bottom-28 md:left-auto md:right-8 md:w-96">
+                    <div className="bg-white shadow-2xl border border-gray-100 flex flex-col overflow-hidden rounded-t-2xl md:rounded-2xl" style={{ height: "70vh", maxHeight: "560px" }}>
 
                         {/* Header */}
                         <div className="bg-gradient-to-r from-fuchsia-700 to-indigo-700 px-4 py-3 flex items-center justify-between shrink-0">
@@ -71,8 +69,8 @@ export default function AIChat() {
                                     <Bot size={16} className="text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-white text-sm font-semibold">AI Letta School</p>
-                                    <p className="text-fuchsia-200 text-xs">Powered by Groq</p>
+                                    <p className="text-white text-sm font-semibold">Shinra</p>
+                                    <p className="text-fuchsia-200 text-xs">AI Agent • Letta School</p>
                                 </div>
                             </div>
                             <button onClick={() => setOpen(false)} className="text-white/80 hover:text-white p-1">
@@ -125,7 +123,7 @@ export default function AIChat() {
                                 value={input}
                                 onChange={e => setInput(e.target.value)}
                                 onKeyDown={e => e.key === "Enter" && sendMessage()}
-                                placeholder="Tanya sesuatu..."
+                                placeholder="Ketik pesan Anda..."
                                 className="flex-1 text-sm px-3 py-2 rounded-xl border border-gray-200 outline-none focus:border-fuchsia-400"
                             />
                             <button onClick={sendMessage} disabled={loading || !input.trim()}
