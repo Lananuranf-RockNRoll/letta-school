@@ -1,5 +1,7 @@
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, Camera } from "lucide-react";
+import { useState, useRef } from "react";
 import type { StudentAPI } from "../api/students";
+import axios from "axios";
 
 interface StudentProfileProps {
     student: StudentAPI;
@@ -14,6 +16,28 @@ function getAge(dob: string | null): string | number {
 }
 
 export default function StudentProfile({ student, onBack, onDelete }: StudentProfileProps) {
+    const [photoUrl, setPhotoUrl] = useState(student.photo_url);
+    const [uploading, setUploading] = useState(false);
+    const fileRef = useRef<HTMLInputElement>(null);
+
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append("photo", file);
+            const res = await axios.post(`/api/v1/upload/student/${student.id}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+            setPhotoUrl(res.data.photo_url);
+        } catch {
+            alert("Gagal upload foto");
+        } finally {
+            setUploading(false);
+        }
+    };
+
     return (
         <div className="bg-white rounded-xl shadow-sm p-6 md:p-10">
             <div className="flex justify-between items-center mb-6">
@@ -28,13 +52,27 @@ export default function StudentProfile({ student, onBack, onDelete }: StudentPro
             <div className="flex flex-col md:flex-row gap-8 md:gap-12">
                 {/* LEFT */}
                 <div className="md:w-1/3 text-center">
-                    <img
-                        src={student.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.full_name)}&size=200&background=random`}
-                        alt={student.full_name}
-                        className="w-32 h-32 md:w-56 md:h-56 rounded-full mx-auto object-cover"
-                    />
+                    <div className="relative w-32 h-32 md:w-56 md:h-56 mx-auto">
+                        <img
+                            src={photoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.full_name)}&size=200&background=random`}
+                            alt={student.full_name}
+                            className="w-full h-full rounded-full object-cover"
+                        />
+                        <button
+                            onClick={() => fileRef.current?.click()}
+                            disabled={uploading}
+                            className="absolute bottom-1 right-1 md:bottom-2 md:right-2 w-8 h-8 md:w-10 md:h-10 bg-fuchsia-600 hover:bg-fuchsia-700 rounded-full flex items-center justify-center shadow-lg transition disabled:opacity-50"
+                        >
+                            {uploading
+                                ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                : <Camera size={16} className="text-white" />
+                            }
+                        </button>
+                        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+                    </div>
                     <h2 className="mt-4 md:mt-6 text-lg md:text-xl font-semibold">{student.full_name}</h2>
                     <p className="text-sm text-gray-500 mt-1">{student.student_number}</p>
+                    <p className="text-xs text-gray-400 mt-2">Klik ikon kamera untuk ganti foto</p>
                 </div>
 
                 {/* RIGHT */}
