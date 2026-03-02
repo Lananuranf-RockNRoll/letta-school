@@ -61,8 +61,8 @@ type GroqRequest struct {
 
 type GroqResponse struct {
 	Choices []struct {
-		Message   GroqMessage `json:"message"`
-		FinishReason string   `json:"finish_reason"`
+		Message      GroqMessage `json:"message"`
+		FinishReason string      `json:"finish_reason"`
 	} `json:"choices"`
 	Error *struct {
 		Message string `json:"message"`
@@ -96,7 +96,6 @@ func getSession(id string) []GroqMessage {
 func setSession(id string, msgs []GroqMessage) {
 	sessionsMu.Lock()
 	defer sessionsMu.Unlock()
-	// Batasi max 30 pesan per session
 	if len(msgs) > 30 {
 		msgs = msgs[len(msgs)-30:]
 	}
@@ -106,8 +105,6 @@ func setSession(id string, msgs []GroqMessage) {
 // ── Tools Definition ─────────────────────────────────────────────────────────
 
 func getTools() []Tool {
-	str := "string"
-	_ = str
 	return []Tool{
 		{
 			Type: "function",
@@ -177,6 +174,71 @@ func getTools() []Tool {
 				},
 			},
 		},
+		{
+			Type: "function",
+			Function: ToolFunc{
+				Name:        "add_student",
+				Description: "Tambah siswa baru ke database sekolah.",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"student_number": map[string]string{"type": "string", "description": "Nomor siswa unik"},
+						"full_name":      map[string]string{"type": "string", "description": "Nama lengkap siswa"},
+						"class_name":     map[string]string{"type": "string", "description": "Nama kelas seperti X-A"},
+						"gender":         map[string]string{"type": "string", "description": "Male atau Female"},
+						"email":          map[string]string{"type": "string", "description": "Email siswa (opsional)"},
+						"phone":          map[string]string{"type": "string", "description": "Nomor telepon (opsional)"},
+					},
+					"required": []string{"student_number", "full_name", "class_name"},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: ToolFunc{
+				Name:        "delete_student",
+				Description: "Hapus siswa dari database berdasarkan nomor siswa.",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"student_number": map[string]string{"type": "string", "description": "Nomor siswa yang akan dihapus"},
+					},
+					"required": []string{"student_number"},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: ToolFunc{
+				Name:        "add_teacher",
+				Description: "Tambah guru baru ke database sekolah.",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"employee_number": map[string]string{"type": "string", "description": "Nomor pegawai unik"},
+						"full_name":       map[string]string{"type": "string", "description": "Nama lengkap guru"},
+						"gender":          map[string]string{"type": "string", "description": "Male atau Female"},
+						"email":           map[string]string{"type": "string", "description": "Email guru (opsional)"},
+						"phone":           map[string]string{"type": "string", "description": "Nomor telepon (opsional)"},
+					},
+					"required": []string{"employee_number", "full_name"},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: ToolFunc{
+				Name:        "delete_teacher",
+				Description: "Hapus guru dari database berdasarkan nomor pegawai.",
+				Parameters: map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"employee_number": map[string]string{"type": "string", "description": "Nomor pegawai yang akan dihapus"},
+					},
+					"required": []string{"employee_number"},
+				},
+			},
+		},
 	}
 }
 
@@ -188,7 +250,7 @@ func executeTool(name string, args map[string]interface{}, db *sql.DB) string {
 		search, _ := args["search"].(string)
 		className, _ := args["class_name"].(string)
 		rows, err := db.Query(`
-			SELECT s.full_name, s.student_number, c.name, s.gender, s.email, s.phone
+			SELECT s.full_name, s.student_number, COALESCE(c.name, '-'), COALESCE(s.gender, '-'), COALESCE(s.email, '-'), COALESCE(s.phone, '-')
 			FROM students s
 			LEFT JOIN classes c ON s.class_id = c.id
 			WHERE ($1 = '' OR s.full_name ILIKE '%' || $1 || '%')
@@ -211,13 +273,13 @@ func executeTool(name string, args map[string]interface{}, db *sql.DB) string {
 		if count == 0 {
 			return "Tidak ada siswa ditemukan."
 		}
-		result.WriteString(fmt.Sprintf("Total: %d siswa ditampilkan", count))
+		result.WriteString(fmt.Sprintf("\nTotal: %d siswa ditampilkan", count))
 		return result.String()
 
 	case "query_teachers":
 		search, _ := args["search"].(string)
 		rows, err := db.Query(`
-			SELECT full_name, employee_number, email, phone, gender
+			SELECT full_name, COALESCE(employee_number, '-'), COALESCE(email, '-'), COALESCE(phone, '-'), COALESCE(gender, '-')
 			FROM teachers
 			WHERE ($1 = '' OR full_name ILIKE '%' || $1 || '%')
 			ORDER BY full_name LIMIT 20
@@ -238,7 +300,7 @@ func executeTool(name string, args map[string]interface{}, db *sql.DB) string {
 		if count == 0 {
 			return "Tidak ada guru ditemukan."
 		}
-		result.WriteString(fmt.Sprintf("Total: %d guru ditampilkan", count))
+		result.WriteString(fmt.Sprintf("\nTotal: %d guru ditampilkan", count))
 		return result.String()
 
 	case "query_classes":
@@ -311,8 +373,6 @@ func executeTool(name string, args map[string]interface{}, db *sql.DB) string {
 		db.QueryRow("SELECT COUNT(*) FROM students").Scan(&totalStudents)
 		db.QueryRow("SELECT COUNT(*) FROM teachers").Scan(&totalTeachers)
 		db.QueryRow("SELECT COUNT(*) FROM classes").Scan(&totalClasses)
-
-		// Kelas dengan siswa terbanyak
 		var topClass string
 		var topCount int
 		db.QueryRow(`
@@ -320,12 +380,86 @@ func executeTool(name string, args map[string]interface{}, db *sql.DB) string {
 			FROM classes c LEFT JOIN students s ON s.class_id = c.id
 			GROUP BY c.id, c.name ORDER BY COUNT(s.id) DESC LIMIT 1
 		`).Scan(&topClass, &topCount)
+		return fmt.Sprintf("STATISTIK LETTA SCHOOL:\n- Total Siswa: %d\n- Total Guru: %d\n- Total Kelas: %d\n- Kelas terbanyak siswa: %s (%d siswa)",
+			totalStudents, totalTeachers, totalClasses, topClass, topCount)
 
-		return fmt.Sprintf(`STATISTIK LETTA SCHOOL:
-- Total Siswa: %d
-- Total Guru: %d
-- Total Kelas: %d
-- Kelas terbanyak siswa: %s (%d siswa)`, totalStudents, totalTeachers, totalClasses, topClass, topCount)
+	case "add_student":
+		studentNumber, _ := args["student_number"].(string)
+		fullName, _ := args["full_name"].(string)
+		className, _ := args["class_name"].(string)
+		gender, _ := args["gender"].(string)
+		email, _ := args["email"].(string)
+		phone, _ := args["phone"].(string)
+		if studentNumber == "" || fullName == "" || className == "" {
+			return "Error: student_number, full_name, dan class_name wajib diisi."
+		}
+		var classID string
+		err := db.QueryRow(`SELECT id FROM classes WHERE name ILIKE $1`, className).Scan(&classID)
+		if err != nil {
+			return "Error: Kelas " + className + " tidak ditemukan."
+		}
+		var id string
+		err = db.QueryRow(`
+			INSERT INTO students (student_number, full_name, email, gender, phone, class_id, enrollment_date)
+			VALUES ($1, $2, NULLIF($3,''), NULLIF($4,''), NULLIF($5,''), $6::UUID, CURRENT_DATE)
+			RETURNING id
+		`, studentNumber, fullName, email, gender, phone, classID).Scan(&id)
+		if err != nil {
+			if strings.Contains(err.Error(), "unique") {
+				return "Error: Nomor siswa " + studentNumber + " sudah ada."
+			}
+			return "Error menambah siswa: " + err.Error()
+		}
+		return fmt.Sprintf("Siswa %s (%s) berhasil ditambahkan ke kelas %s.", fullName, studentNumber, className)
+
+	case "delete_student":
+		studentNumber, _ := args["student_number"].(string)
+		if studentNumber == "" {
+			return "Error: student_number wajib diisi."
+		}
+		var fullName string
+		err := db.QueryRow(`SELECT full_name FROM students WHERE student_number = $1`, studentNumber).Scan(&fullName)
+		if err != nil {
+			return "Error: Siswa dengan nomor " + studentNumber + " tidak ditemukan."
+		}
+		db.Exec(`DELETE FROM students WHERE student_number = $1`, studentNumber)
+		return fmt.Sprintf("Siswa %s (%s) berhasil dihapus.", fullName, studentNumber)
+
+	case "add_teacher":
+		employeeNumber, _ := args["employee_number"].(string)
+		fullName, _ := args["full_name"].(string)
+		gender, _ := args["gender"].(string)
+		email, _ := args["email"].(string)
+		phone, _ := args["phone"].(string)
+		if employeeNumber == "" || fullName == "" {
+			return "Error: employee_number dan full_name wajib diisi."
+		}
+		var id string
+		err := db.QueryRow(`
+			INSERT INTO teachers (employee_number, full_name, email, gender, phone)
+			VALUES ($1, $2, NULLIF($3,''), NULLIF($4,''), NULLIF($5,''))
+			RETURNING id
+		`, employeeNumber, fullName, email, gender, phone).Scan(&id)
+		if err != nil {
+			if strings.Contains(err.Error(), "unique") {
+				return "Error: Nomor pegawai " + employeeNumber + " sudah ada."
+			}
+			return "Error menambah guru: " + err.Error()
+		}
+		return fmt.Sprintf("Guru %s (%s) berhasil ditambahkan.", fullName, employeeNumber)
+
+	case "delete_teacher":
+		employeeNumber, _ := args["employee_number"].(string)
+		if employeeNumber == "" {
+			return "Error: employee_number wajib diisi."
+		}
+		var fullName string
+		err := db.QueryRow(`SELECT full_name FROM teachers WHERE employee_number = $1`, employeeNumber).Scan(&fullName)
+		if err != nil {
+			return "Error: Guru dengan nomor " + employeeNumber + " tidak ditemukan."
+		}
+		db.Exec(`DELETE FROM teachers WHERE employee_number = $1`, employeeNumber)
+		return fmt.Sprintf("Guru %s (%s) berhasil dihapus.", fullName, employeeNumber)
 	}
 
 	return "Tool tidak dikenal: " + name
@@ -349,7 +483,6 @@ func aiChat(db *sql.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "GROQ_API_KEY not set"})
 		}
 
-		// System prompt Shinra
 		systemContent := `Kamu adalah Shinra, AI Agent profesional untuk sistem manajemen Letta School.
 
 IDENTITAS:
@@ -359,36 +492,32 @@ IDENTITAS:
 
 KEMAMPUAN:
 - Mengakses data real-time dari database sekolah menggunakan tools
+- Menambah dan menghapus data siswa dan guru
 - Menjawab pertanyaan tentang siswa, guru, kelas, dan jadwal
 - Menganalisis data dan memberikan insight
-- Menghasilkan laporan ringkas
 
 INSTRUKSI:
-- Selalu gunakan tools untuk mengambil data terbaru sebelum menjawab
+- Selalu gunakan tools untuk mengambil atau memodifikasi data
+- Sebelum menghapus data, konfirmasi dulu dengan user
 - Jawab dalam Bahasa Indonesia yang formal dan profesional
 - Sertakan data spesifik dalam jawaban
-- Jika diminta analisis, berikan insight yang berguna
 - Perkenalkan diri sebagai "Shinra" jika ditanya identitas`
 
-		// Ambil session memory
 		sessionID := req.SessionID
 		if sessionID == "" {
 			sessionID = "default"
 		}
 		history := getSession(sessionID)
 
-		// Build messages
 		sysContent := systemContent
 		messages := []GroqMessage{
 			{Role: "system", Content: &sysContent},
 		}
 		messages = append(messages, history...)
 
-		// Tambah pesan user baru
 		userContent := req.Message
 		messages = append(messages, GroqMessage{Role: "user", Content: &userContent})
 
-		// Agentic loop — max 5 iterasi
 		for i := 0; i < 5; i++ {
 			groqReq := GroqRequest{
 				Model:     "llama-3.3-70b-versatile",
@@ -421,16 +550,13 @@ INSTRUKSI:
 
 			choice := groqResp.Choices[0]
 
-			// Kalau ada tool calls
 			if len(choice.Message.ToolCalls) > 0 {
 				messages = append(messages, choice.Message)
-
 				for _, tc := range choice.Message.ToolCalls {
 					var args map[string]interface{}
 					json.Unmarshal([]byte(tc.Function.Arguments), &args)
 					result := executeTool(tc.Function.Name, args, db)
-					log.Printf("Tool %s called, result: %s", tc.Function.Name, result[:min(100, len(result))])
-
+					log.Printf("Tool %s called", tc.Function.Name)
 					toolContent := result
 					messages = append(messages, GroqMessage{
 						Role:       "tool",
@@ -442,15 +568,11 @@ INSTRUKSI:
 				continue
 			}
 
-			// Final response
 			if choice.Message.Content != nil {
 				finalReply := *choice.Message.Content
-
-				// Simpan ke session (tanpa system prompt)
 				newHistory := append(history, GroqMessage{Role: "user", Content: &userContent})
 				newHistory = append(newHistory, GroqMessage{Role: "assistant", Content: &finalReply})
 				setSession(sessionID, newHistory)
-
 				return c.JSON(fiber.Map{"reply": finalReply})
 			}
 
