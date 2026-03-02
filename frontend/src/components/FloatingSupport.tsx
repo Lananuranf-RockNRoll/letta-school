@@ -5,7 +5,7 @@ export default function FloatingSupport() {
     const [supportOpen, setSupportOpen] = useState(false);
 
     return (
-        <div className="fixed bottom-6 left-6 md:bottom-8 md:left-72 z-50">
+        <div className="fixed bottom-24 left-4 md:bottom-24 md:left-72 z-40">
             <div className="relative">
                 {supportOpen && (
                     <div className="absolute bottom-14 left-0 bg-white rounded-xl shadow-xl border border-gray-100 w-52 overflow-hidden">
