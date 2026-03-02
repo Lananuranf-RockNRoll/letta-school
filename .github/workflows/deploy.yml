@@ -19,5 +19,9 @@ jobs:
             cd ~/letta-school
             git fetch origin
             git reset --hard origin/main
+            sed -i '/^CLOUDINARY/d' .env
+            echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
+            echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
+            echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
             docker compose up --build -d
             docker image prune -f
