@@ -810,3 +810,5 @@ docker exec -it school_db psql -U school_user -d school_db -f /seed.sql
 ---
 
 *Dokumentasi ini dibuat otomatis untuk proyek Letta School. Untuk pertanyaan lebih lanjut, gunakan fitur AI Chat di dalam aplikasi.*
+
+ci/cd update 
