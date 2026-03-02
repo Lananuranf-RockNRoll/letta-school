@@ -1,4 +1,4 @@
-import { Search, ChevronUp, Headphones, MessageCircle, BookOpen } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import ScheduleTable from "../components/ScheduleTable";
 import ScheduleModal from "../components/ScheduleModal";
@@ -48,7 +48,6 @@ function buildClassSchedules(classes: ClassAPI[], schedules: ScheduleAPI[]): Cla
 }
 
 export default function Schedule() {
-    const [supportOpen, setSupportOpen] = useState(false);
     const [selectedClass, setSelectedClass] = useState<ClassSchedule | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [classes, setClasses] = useState<ClassSchedule[]>([]);
@@ -107,28 +106,6 @@ export default function Schedule() {
 
             {showForm && <AddScheduleForm onClose={() => setShowForm(false)} onSuccess={() => { setShowForm(false); fetchData(); }} />}
             {selectedClass && <ScheduleModal selectedClass={selectedClass} onClose={() => setSelectedClass(null)} onRefresh={() => { fetchData(); setSelectedClass(null); }} />}
-
-            <div className="fixed bottom-6 left-6 md:bottom-8 md:left-72 z-50">
-                <div className="relative">
-                    {supportOpen && (
-                        <div className="absolute bottom-14 left-0 bg-white rounded-xl shadow-xl border border-gray-100 w-52 overflow-hidden">
-                            <a href="https://wa.me/6285960235008" target="_blank" rel="noopener noreferrer"
-                               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-sm text-gray-700">
-                                <MessageCircle size={16} className="text-green-500" />Live Chat
-                            </a>
-                            <a href="/features"
-                               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-sm text-gray-700 border-t">
-                                <BookOpen size={16} className="text-indigo-500" />Documentation
-                            </a>
-                        </div>
-                    )}
-                    <button onClick={() => setSupportOpen(!supportOpen)}
-                            className="flex items-center gap-2 bg-indigo-900 text-white px-4 py-2 rounded-full shadow-lg text-sm">
-                        <Headphones size={16} /><span>Support</span>
-                        <ChevronUp size={14} className={`transition-transform ${supportOpen ? "rotate-180" : ""}`} />
-                    </button>
-                </div>
-            </div>
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import {
-    UserPlus, School, GraduationCap, Bell, Headphones, ChevronUp, Users, BookOpen, MessageCircle,
+    UserPlus, School, GraduationCap, Bell,  Users, BookOpen,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,6 @@ import AddClassForm from "../components/AddClassForm";
 
 export default function Dashboard() {
     const navigate = useNavigate();
-    const [supportOpen, setSupportOpen] = useState(false);
     const [notifOpen, setNotifOpen] = useState(false);
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [showAddAdmin, setShowAddAdmin] = useState(false);
@@ -117,30 +116,6 @@ export default function Dashboard() {
             {showAddAdmin && <AddAdminForm onClose={() => setShowAddAdmin(false)} onSuccess={() => { setShowAddAdmin(false); fetchStats(); }} />}
             {showAddClass && <AddClassForm onClose={() => setShowAddClass(false)} onSuccess={() => { setShowAddClass(false); fetchStats(); }} />}
 
-            {/* FLOATING SUPPORT */}
-            {/* FLOATING SUPPORT */}
-            <div className="fixed bottom-6 left-6 md:bottom-8 md:left-72 z-50">
-                <div className="relative">
-                    {supportOpen && (
-                        <div className="absolute bottom-14 left-0 bg-white rounded-xl shadow-xl border border-gray-100 w-52 overflow-hidden">
-                            <a href="https://wa.me/6285960235008" target="_blank" rel="noopener noreferrer"
-                               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-sm text-gray-700">
-                                <MessageCircle size={16} className="text-green-500" />Live Chat
-                            </a>
-                            <a href="/features"
-                               className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition text-sm text-gray-700 border-t">
-                                <BookOpen size={16} className="text-indigo-500" />Documentation
-                            </a>
-                        </div>
-                    )}
-                    <button onClick={() => setSupportOpen(!supportOpen)}
-                            className="flex items-center gap-2 bg-indigo-900 text-white px-4 py-2 rounded-full shadow-lg hover:bg-indigo-800 transition text-sm">
-                        <Headphones size={18} />
-                        <span>Support</span>
-                        <ChevronUp size={16} className={`transition-transform ${supportOpen ? "rotate-180" : ""}`} />
-                    </button>
-                </div>
-            </div>
         </div>
     );
 }

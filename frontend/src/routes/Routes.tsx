@@ -8,6 +8,7 @@ import Schedule from "../pages/Schedule";
 import Login from "../pages/Login";
 import Features from "../pages/Features";
 import AIChat from "../components/AIChat";
+import FloatingSupport from "../components/FloatingSupport";
 
 function ProtectedLayout({ children }: { children: React.ReactNode }) {
     if (!isLoggedIn()) return <Navigate to="/login" replace />;
@@ -17,6 +18,7 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
             <div className="flex-1 flex flex-col overflow-hidden">
                 {children}
                 <AIChat />
+                <FloatingSupport />
             </div>
         </div>
     );

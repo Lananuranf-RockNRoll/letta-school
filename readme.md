@@ -1,4 +1,4 @@
-# 📚 Dokumentasi Letta School — Sistem Manajemen Sekolah
+#  Dokumentasi Letta School — Sistem Manajemen Sekolah
 
 > Dokumentasi lengkap dari A-Z untuk sistem manajemen sekolah berbasis web.  
 > **URL Produksi:** https://school.lananuranf.my.id  
