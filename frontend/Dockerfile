@@ -15,6 +15,8 @@ RUN npm run build
 # ── Stage 2: Serve dengan Nginx ──────────────────────────────
 FROM nginx:alpine
 
+RUN apk update && apk upgrade libpng && rm -rf /var/cache/apk/*
+
 RUN rm /etc/nginx/conf.d/default.conf
 
 COPY nginx-spa.conf /etc/nginx/conf.d/default.conf
