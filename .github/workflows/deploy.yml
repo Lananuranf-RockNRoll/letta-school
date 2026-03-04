@@ -19,9 +19,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  container-scan:
+  dependency-scan:
     runs-on: ubuntu-latest
     needs: security-scan
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install frontend dependencies
+        run: npm install
+        working-directory: ./frontend
+
+      - name: Frontend dependency audit
+        run: npm audit --audit-level=high
+        working-directory: ./frontend
+
+  container-scan:
+    runs-on: ubuntu-latest
+    needs: [security-scan, dependency-scan]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
